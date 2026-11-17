@@ -1,0 +1,594 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<style id="hide-netlify-badge">
+/* Netlify가 삽입하는 Powered by Netlify 배지 숨김 */
+#netlify-badge, iframe#netlify-badge, iframe[title*="Netlify"],
+[id^="netlify-badge"], [class*="netlify-badge"], [data-netlify-badge] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+</style>
+</head><body>
+<title>퇴근 불가 컴퍼니</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 레이아웃: 폰 메신저 한 칼럼. 위 사원증 HUD, 가운데 단톡방, 아래 선택지. 형광등 켜진 사무실 톤의 단일 룩 */
+:root{
+  --bg:#cfd8cf; --panel:#eef1ea; --paper:#ffffff; --ink:#18201c; --muted:#56635b; --line:#a9b6aa;
+  --jihan:#b3261e; --minkyul:#2d5b8c; --me:#f3d34a; --me-ink:#2b2400; --sys:#6f7b74;
+  --hp:#2f7d4f; --mind:#6b4fa0; --favor:#c77d12; --good:#1f7a45; --bad:#b3261e;
+  --f-display:'Black Han Sans','Noto Sans KR',sans-serif;
+  --f-body:'Noto Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  color-scheme: light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
+*{box-sizing:border-box}
+button,input{font-family:inherit}
+#app{max-width:520px;height:100%;margin:0 auto;display:flex;flex-direction:column;gap:8px;padding-block:8px;min-height:0}
+
+/* HUD */
+#hud{background:var(--panel);border:2px solid var(--ink);border-radius:4px;box-shadow:3px 3px 0 var(--ink);padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex:none}
+.hud-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.corp{font-family:var(--f-display);font-size:16px;letter-spacing:.02em}
+.corp b{font-family:var(--f-body);font-weight:500;font-size:13px;color:var(--muted);margin-left:6px}
+.clock{font-weight:700;font-variant-numeric:tabular-nums;font-size:14px;background:var(--ink);color:var(--panel);padding:1px 8px;border-radius:3px}
+.gauges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.gl{display:flex;align-items:baseline;gap:4px;font-size:12px;font-weight:700;white-space:nowrap}
+.gv{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:500}
+.chg{margin-left:auto;font-variant-numeric:tabular-nums;opacity:0}
+.chg.show{animation:chg 1.4s ease-out}
+.chg.up{color:var(--good)} .chg.dn{color:var(--bad)}
+@keyframes chg{0%{opacity:0;transform:translateY(4px)}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0}}
+.track{height:10px;background:var(--line);border:1.5px solid var(--ink);border-radius:2px;overflow:hidden;margin-top:3px}
+.track i{display:block;height:100%;width:50%;transition:width .5s ease}
+#b-h{background:var(--hp)} #b-m{background:var(--mind)} #b-f{background:var(--favor)}
+#hud.hit{animation:hit .4s}
+@keyframes hit{0%,100%{transform:none}25%{transform:translateX(-4px)}60%{transform:translateX(4px)}}
+
+/* 단톡방 */
+#chat{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:6px 2px;scroll-behavior:smooth}
+.row{display:flex;gap:8px;align-items:flex-start;animation:pop .22s ease-out}
+.row.me{flex-direction:row-reverse}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-family:var(--f-display);font-size:17px;border:2px solid var(--ink)}
+.row.j .av{background:var(--jihan)} .row.m .av{background:var(--minkyul)}
+.col{min-width:0;max-width:80%;display:flex;flex-direction:column;gap:2px}
+.row.me .col{align-items:flex-end}
+.nm{font-size:11px;color:var(--muted);font-weight:700}
+.bub{background:var(--paper);border:1.5px solid var(--ink);border-radius:3px 14px 14px 14px;padding:8px 12px;word-break:keep-all;overflow-wrap:anywhere;white-space:pre-wrap}
+.row.j .bub{border-left:5px solid var(--jihan)} .row.m .bub{border-left:5px solid var(--minkyul)}
+.row.me .bub{background:var(--me);color:var(--me-ink);border-radius:14px 3px 14px 14px}
+.row.s{justify-content:center}
+.sys{font-size:12px;color:var(--sys);background:rgba(255,255,255,.55);border:1px dashed var(--line);border-radius:99px;padding:3px 12px;text-align:center;max-width:92%}
+.dots{display:inline-flex;gap:4px;padding:4px 2px}
+.dots span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:dot 1s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,60%,100%{opacity:.25}30%{opacity:1}}
+
+/* 선택지 */
+#choices{flex:none;display:grid;gap:8px;padding-top:2px}
+#choices:empty{display:none}
+.opt{text-align:left;padding:10px 14px;background:var(--panel);color:var(--ink);border:2px solid var(--ink);border-radius:4px;box-shadow:3px 3px 0 var(--ink);font-size:14px;font-weight:500;line-height:1.4;cursor:pointer;word-break:keep-all;overflow-wrap:anywhere;transition:transform .08s,box-shadow .08s}
+.opt:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--ink);background:#fff}
+.opt:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.opt:focus-visible,.btn:focus-visible,#nick:focus-visible{outline:3px solid var(--minkyul);outline-offset:2px}
+
+/* 오버레이 */
+.screen{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;display:flex;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.card{margin:auto;width:min(420px,100%);background:var(--panel);border:2px solid var(--ink);border-radius:6px;box-shadow:5px 5px 0 var(--ink);position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;top:10px;left:50%;width:54px;height:10px;margin-left:-27px;border-radius:99px;background:var(--bg);border:2px solid var(--ink);z-index:2}
+.strip{background:var(--jihan);color:#fff;padding:32px 20px 12px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.strip b{font-family:var(--f-display);font-size:19px;font-weight:400}
+.strip span{font-size:12px;opacity:.9;letter-spacing:.08em}
+.body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:14px}
+.photo{display:flex;gap:14px;align-items:center}
+.sil{flex:none;width:76px;height:92px;border:2px solid var(--ink);background:var(--line);position:relative;overflow:hidden}
+.sil::before{content:"";position:absolute;left:50%;top:16px;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:var(--ink)}
+.sil::after{content:"";position:absolute;left:50%;top:52px;width:58px;height:50px;margin-left:-29px;border-radius:50% 50% 0 0;background:var(--ink)}
+h1{font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1.15;margin:0;text-wrap:balance}
+.sub{margin:0;font-size:13px;color:var(--muted);word-break:keep-all}
+label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px}
+#nick{width:100%;font-size:18px;font-weight:700;padding:9px 12px;border:2px solid var(--ink);border-radius:3px;background:#fff;color:var(--ink)}
+.btn{width:100%;font-size:16px;font-weight:700;padding:12px;border:2px solid var(--ink);border-radius:4px;background:var(--jihan);color:#fff;box-shadow:3px 3px 0 var(--ink);cursor:pointer}
+.btn:active{transform:translate(3px,3px);box-shadow:none}
+.btn.alt{background:var(--panel);color:var(--ink)}
+.fine{margin:0;font-size:11px;color:var(--muted);line-height:1.5;word-break:keep-all}
+.bosses{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.boss{border:1.5px solid var(--ink);background:#fff;padding:8px 10px;font-size:12px;line-height:1.4;word-break:keep-all}
+.boss b{display:block;font-size:13px}
+.boss.j{border-top:5px solid var(--jihan)} .boss.m{border-top:5px solid var(--minkyul)}
+
+/* 평가서 */
+.stamp{position:absolute;right:14px;top:56px;transform:rotate(-12deg);border:3px solid var(--jihan);color:var(--jihan);font-family:var(--f-display);font-size:20px;padding:0 10px;border-radius:4px;opacity:.85;background:rgba(255,255,255,.5);z-index:3}
+.grade{font-family:var(--f-display);font-size:54px;line-height:1;color:var(--jihan)}
+dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0;font-size:14px}
+dt{color:var(--muted)} dd{margin:0;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.end-desc{margin:0;word-break:keep-all}
+.end-sub{margin:0;font-size:13px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;word-break:keep-all}
+
+/* 엔딩 도감 */
+.codex-list{display:grid;gap:8px}
+.codex-item{border:1.5px solid var(--ink);background:#fff;padding:10px 12px;display:grid;grid-template-columns:42px 1fr;gap:10px;align-items:center}
+.codex-grade{width:42px;height:42px;display:grid;place-items:center;border:2px solid var(--ink);background:var(--panel);font-family:var(--f-display);font-size:20px;color:var(--jihan)}
+.codex-item.locked{background:#e4e8e1;color:#7c877e;border-style:dashed}
+.codex-item.locked .codex-grade{color:#7c877e;background:#d5dbd3;border-style:dashed}
+.codex-title{font-weight:700;font-size:14px;word-break:keep-all}
+.codex-desc{font-size:12px;color:var(--muted);margin-top:2px;word-break:keep-all}
+.codex-count{font-weight:700;font-variant-numeric:tabular-nums}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media (max-width:380px){h1{font-size:26px}.gauges{gap:6px}}
+</style>
+
+<div id="app">
+  <header id="hud" hidden>
+    <div class="hud-top">
+      <div class="corp">(주)서류컴퍼니<b id="whoami"></b></div>
+      <div class="clock" id="clock">월 09:00</div>
+    </div>
+    <div class="gauges">
+      <div><div class="gl"><span>체력</span><span class="gv" id="v-h">70</span><span class="chg" id="c-h"></span></div><div class="track"><i id="b-h"></i></div></div>
+      <div><div class="gl"><span>멘탈</span><span class="gv" id="v-m">70</span><span class="chg" id="c-m"></span></div><div class="track"><i id="b-m"></i></div></div>
+      <div><div class="gl"><span>사장 눈치</span><span class="gv" id="v-f">50</span><span class="chg" id="c-f"></span></div><div class="track"><i id="b-f"></i></div></div>
+    </div>
+  </header>
+  <main id="chat" aria-live="polite"></main>
+  <div id="choices"></div>
+</div>
+
+<section class="screen" id="start">
+  <form class="card" id="form" autocomplete="off">
+    <div class="strip"><b>(주)서류컴퍼니</b><span>EMPLOYEE ID · 임시</span></div>
+    <div class="body">
+      <div class="photo">
+        <div class="sil" aria-hidden="true"></div>
+        <div>
+          <h1>퇴근 불가 컴퍼니</h1>
+          <p class="sub">월요일부터 금요일까지, 사장 둘 밑에서 살아남기</p>
+        </div>
+      </div>
+      <div class="bosses">
+        <div class="boss j"><b>서지한 사장</b>호통과 숫자로 압박. "내가 너 때는 말이야"가 입버릇.</div>
+        <div class="boss m"><b>류민결 사장</b>웃으면서 일을 얹는다. "우리는 가족이잖아요^^"</div>
+      </div>
+      <div>
+        <label for="nick">사원 닉네임 (사장님들이 이 이름으로 부릅니다)</label>
+        <input id="nick" maxlength="8" placeholder="예: 제로, 김대리, 퇴근요정" required>
+      </div>
+      <button class="btn" type="submit">입사하기 (퇴사 불가)</button>
+      <button class="btn alt" id="open-codex-start" type="button">엔딩 도감 <span class="codex-count" id="codex-count-start">0/8</span></button>
+      <p class="fine">※ 본 게임에 등장하는 사장은 모두 허구이며, 현실의 악덕 사장과 닮았다면 우연이 아닙니다. 연차는 신청할 수 있으나 사용은 보장하지 않습니다.</p>
+    </div>
+  </form>
+</section>
+
+<section class="screen" id="end" hidden>
+  <div class="card">
+    <div class="stamp" id="e-stamp">평가 완료</div>
+    <div class="strip"><b>인사평가서</b><span id="e-who"></span></div>
+    <div class="body">
+      <div class="grade" id="e-grade">F</div>
+      <h1 id="e-title"></h1>
+      <p class="end-desc" id="e-desc"></p>
+      <dl id="e-stats"></dl>
+      <p class="end-sub" id="e-sub"></p>
+      <button class="btn alt" id="open-codex-end" type="button">엔딩 도감 보기</button>
+      <button class="btn" id="again" type="button">다시 출근하기</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="codex" hidden>
+  <div class="card">
+    <div class="strip"><b>엔딩 도감</b><span class="codex-count" id="codex-progress">0 / 8 발견</span></div>
+    <div class="body">
+      <p class="sub">직장 생활의 끝에서 발견한 결말을 기록합니다. 아직 경험하지 못한 엔딩은 비밀로 남아 있습니다.</p>
+      <div class="codex-list" id="codex-list"></div>
+      <button class="btn alt" id="close-codex" type="button">돌아가기</button>
+    </div>
+  </div>
+</section>
+<script>
+/* 이벤트 형식: {w: 말하는 사람(j/m/jm/s), t: 대사, c: [[선택지, 체력, 멘탈, 눈치, 사장 반응], ...]} */
+const EVENTS=[];
+EVENTS.push(
+{w:'j',t:`{n아}, 이 보고서 오타 3개. 내 눈에 3개면 거래처 눈엔 30개야. 지금 다시 해와.`,c:[
+ [`바로 수정하겠습니다!`,-8,-5,8,`그래, 처음부터 그렇게 했어야지. 나 때는 오타 하나에 사직서 썼어.`],
+ [`저... 그 오타는 사장님 자료에 있던 건데요`,0,-2,-15,`지금 변명하는 거야? 월급 루팡 소리 듣고 싶어?`],
+ [`(조용히 읽씹하고 커피를 타러 간다)`,0,8,-12,`읽씹? 메신저 읽음 표시 내가 다 보고 있어.`]]},
+
+{w:'j',t:`{n아}, 오늘 일 다 끝났어? 퇴근? 끝나고 딱 한 건만 더 하고 가. (이 말, 어제도 했음)`,c:[
+ [`네, 한 건만 더 하겠습니다`,-12,-3,6,`역시 {n}밖에 없다. 한 건이 열 건 될 수도 있으니까 각오해.`],
+ [`오늘은 선약이 있어서요`,0,4,-10,`선약? 회사보다 중요한 약속이 있다는 거야? 인사평가에 적어두지.`],
+ [`(화장실 간다 하고 노트북 들고 탈출)`,3,6,-6,`{n아}, 화장실에 한 시간째네. CCTV 돌려볼까?`]]},
+
+{w:'j',t:`점심? 시간 아끼게 김밥 시켰다. 자리에서 먹으면서 일해. 식비는 개인 부담이야.`,c:[
+ [`감사합니다! 맛있게 먹겠습니다`,-4,-6,7,`김밥 한 줄에 감사할 줄 아는 게 기본이지.`],
+ [`저 점심 약속 있어서 나가보겠습니다`,8,6,-9,`점심에 한 시간이나 쓴다고? 나는 밥을 5분에 먹는데.`],
+ [`김밥을 먹으며 몰래 채용 공고를 본다`,-2,5,0,`{n이} 뭐 보고 있지? 업무 화면 맞지? 응?`]]},
+
+{w:'j',t:`오늘 회식이다. 강제 아니야. 근데 안 오면 '자율'이 '평가'가 되는 거 알지?`,c:[
+ [`기꺼이 참석하겠습니다!`,-10,-8,10,`분위기 메이커 {n}! 3차까지 간다. 내일 아침 9시 정시 출근이다.`],
+ [`컨디션이 안 좋아서 이번엔...`,6,2,-12,`컨디션도 관리해야 실력이다. 그 얘기는 평가 때 하자.`],
+ [`(건배사를 맡겠다고 선수를 친다)`,-6,4,14,`건배사 길게 해라. 오늘 밤은 길다.`]]},
+
+{w:'j',t:`연차 쓰겠다고? 우리 회사에 연차라는 제도가 있었나? 아, 있긴 있지. 쓰는 사람이 없을 뿐이야.`,c:[
+ [`그럼 이번엔 안 쓰겠습니다`,-3,-10,8,`그래, 요즘 애들은 쉴 줄만 알아서 문제야. {n}은 다르네.`],
+ [`근로기준법상 연차는 권리입니다`,4,12,-18,`법? 내 앞에서 법을 말해? ...(눈빛이 흔들린다) 일단 나가 있어.`],
+ [`아프다고 반차를 쓴다`,10,3,-8,`반차 쓰고 쉬는 동안 메신저는 켜 놔라.`]]},
+
+{w:'j',t:`{n아}, 복사지 한 장도 아껴 써. 이면지 썼냐? 이면지의 이면지는? 그것도 안 쓰면 낭비야.`,c:[
+ [`이면지의 이면지도 활용하겠습니다`,-2,-4,9,`좋아. 쓰다 남은 건 책상 위 연필꽂이에 모아둬.`],
+ [`사장님 책상 위 비싼 만년필은요?`,0,8,-14,`그건 투자야. 너는 비용이고.`],
+ [`화장실 휴지도 반으로 접어 쓰겠습니다`,0,-2,5,`...좋은 자세다. 반으로 접은 걸 또 반으로 접어.`]]},
+
+{w:'j',t:`이번 달 성과 보고서 가져와. 내가 보기엔 {n}의 성과는 사실 내 지시가 8할이야.`,c:[
+ [`모두 사장님 덕분입니다`,0,-8,12,`알면 됐다. 내 덕을 잊지 말고 더 뛰어라.`],
+ [`사실 제가 한 게 맞는데요`,0,5,-14,`맞다고 하는 놈치고 오래 남는 놈을 못 봤다.`],
+ [`성과표를 만들어 사장님 이름을 맨 위에 넣는다`,-6,-2,16,`센스 있네. 다음 보고서도 이 포맷으로.`]]},
+
+{w:'j',t:`토요일 출근 가능하지? 아니, 묻는 게 아니라 확인하는 거야. 대답은 '네'만 가능해.`,c:[
+ [`네!`,-14,-6,10,`좋아. 도시락은 싸 와라.`],
+ [`아니오, 어렵습니다`,8,8,-20,`'아니오'라... 그 단어 처음 들어서 사전 찾아봤다. 있더라.`],
+ [`가긴 가는데 일은 안 하기로 한다`,-4,3,-4,`와서 앉아 있기만 해라. 앉아 있는 것도 일이다.`]]},
+
+{w:'j',t:`오늘부터 이름 앞에 '열정'을 붙인다. 열정 {n}. 부르면 '넵 열정입니다!'로 대답해.`,c:[
+ [`넵! 열정 {n}입니다!`,-3,-10,12,`목소리가 작다. 다시. 더 크게.`],
+ [`저는 제 이름이 마음에 드는데요`,0,8,-10,`마음에 들고 말고는 내가 정해.`],
+ [`열정은 퇴근 후에 사라지는데요`,0,5,-6,`열정은 퇴근이 없어. 24시간 영업이야.`]]},
+
+{w:'j',t:`법인 노트북 고장났다고? 그럼 네 개인 노트북 가져와. 보안은 신경 쓰지 말고.`,c:[
+ [`네, 제 노트북 가져오겠습니다`,-3,-8,9,`그래, 사원이 자기 장비를 챙기는 건 기본 자세지.`],
+ [`보안 규정 위반이라 안 됩니다`,0,10,-8,`그 보안 규정 누가 만들었어? ...아, 나네.`],
+ [`(사장님 노트북을 슬쩍 가져와 쓴다)`,0,6,-14,`내 노트북 어딨어?! 아니 그보다 왜 {n} 자리에 있어?!`]]},
+
+{w:'j',t:`{n아}, 거래처에 전화해서 '사장님께서 죽도록 감사하다더라' 전해. 그리고 단가는 30% 깎아달래.`,c:[
+ [`죄송하지만 그대로 전달하겠습니다`,-4,-9,8,`그래, 요령껏 해. 안 되면 되게 해.`],
+ [`단가 얘기는 사장님이 직접 하시는 게...`,0,4,-12,`직접 하면 내가 뭐 하러 널 뽑았겠어?`],
+ [`전화를 걸고 통화 대기음만 듣는다`,0,7,-5,`연결 안 됐다고? 될 때까지 걸어. 밤새서라도.`]]},
+
+{w:'j',t:`{n}, 요즘 출근이 9시 정각이던데. 8시 50분이 정시라는 건 알지?`,c:[
+ [`내일부터 8시 40분에 오겠습니다`,-8,-4,8,`40분? 30분이 더 좋겠다만, 일단 40분부터 시작해.`],
+ [`계약서에 9시 출근이라고 적혀 있는데요`,0,6,-12,`계약서는 종이일 뿐이야.`],
+ [`알람을 5개 맞췄다고 대답만 한다`,-2,2,2,`그래, 내일 8시 40분에 CCTV 확인한다.`]]},
+
+{w:'j',t:`탕비실 믹스커피가 왜 이렇게 빨리 줄어? {n이} 많이 먹는 거 아니야? 하루 한 잔. 개수 체크한다.`,c:[
+ [`아껴 마시겠습니다`,-2,-5,6,`그래. 그 한 잔도 일하면서 마셔라.`],
+ [`저는 안 먹는데요. 사장님이 드시는 거 아닌가요`,0,6,-12,`...내가 먹은 건 업무 효율 향상용이야.`],
+ [`커피믹스를 집에 가져가 비축한다`,3,4,-8,`탕비실에 CCTV 달았다. 내일부터.`]]},
+
+{w:'j',t:`(새벽 1시) {n아} 자냐? 이 파일 확인하고 아침에 보고해. 답장은 안 해도 돼. 읽었다는 표시만 남겨.`,c:[
+ [`확인했습니다!`,-6,-6,9,`(1분 뒤) 확인했으면 보고서도 써. 아침에 보자.`],
+ [`(무음으로 해놓고 잠든 척한다)`,6,5,-8,`(아침 7시) 부재중 전화 12통은 어떻게 설명할래?`],
+ [`새벽에는 연락을 자제해 주세요`,4,10,-16,`자제? 사장이 연락하는데 직원이 자제를 요청해? 하하하하.`]]}
+);
+/* 류민결 / 합동 / 휴식(s) 이벤트 */
+EVENTS.push(
+{w:'m',t:`{n}씨~ 우리 회사는 가족이잖아요. 가족끼리 야근수당 같은 거 따지는 거 아니죠? ^^`,c:[
+ [`물론이죠, 가족인데요`,-6,-9,12,`어머, 역시 {n}씨는 마음이 예뻐~ 이번 주 야근도 같이 해요^^`],
+ [`가족이면 월급도 가족 가격으로...`,0,6,-14,`어머~ {n}씨 농담도 잘하네요^^ (눈은 웃고 있지 않다)`],
+ [`야근수당은 법적으로 지급해야 합니다`,0,8,-18,`법적으로는 그렇죠~ 그런데 정서적으로는요?`]]},
+
+{w:'m',t:`오늘 다들 고생했어요~ 제가 치킨 쏠게요! 대신 먹으면서 회의해요^^ 오늘 안에 끝내야 하는 거 알죠?`,c:[
+ [`치킨 감사합니다! 먹으면서 하겠습니다`,-6,-3,8,`맛있게 먹고 힘내서 새벽까지 달려요~ 파이팅!`],
+ [`치킨보다 퇴근이 더 먹고 싶습니다`,0,8,-12,`어머, 너무 솔직하다~ 그 솔직함, 평가에 반영할게요^^`],
+ [`닭다리만 챙기고 조용히 퇴근한다`,8,5,-10,`닭다리가 사라졌네요~ 범인은 가까이 있을 텐데^^`]]},
+
+{w:'m',t:`이번 프로젝트 잘되면 {n}씨한테 '경험'이라는 큰 보상이 갈 거예요. 월급은 못 올려드리지만 경험은 무한대로 드릴게요.`,c:[
+ [`경험이 최고죠!`,0,-10,12,`어머, 마인드가 너무 멋져요~ 이 경험 SNS에도 올려요!`],
+ [`경험으로는 월세를 못 냅니다`,0,8,-12,`아이~ 너무 현실적이다. 꿈을 꿔야지요.`],
+ [`그럼 경험 증명서를 발급해 주세요`,0,4,-6,`증명서는 퇴사할 때 줄게요. 아주 나중에요^^`]]},
+
+{w:'m',t:`{n}씨~ 별거 아닌 건데 이거 하나만 부탁해요. 오늘 중으로요. 어차피 {n}씨는 일이 빠르잖아요~ (첨부파일 47개)`,c:[
+ [`(첨부파일 47개를 확인한다...) 네...`,-10,-6,7,`역시 믿고 맡길 사람은 {n}씨밖에 없어요~`],
+ [`별거 아닌 일이 47개군요`,0,6,-9,`작은 게 많은 게 큰 거 하나보다 쉬운 거 알죠?^^`],
+ [`이건 AI한테 시켜 보겠습니다`,3,2,2,`어머, 똑똑하다~ 그럼 그 이용료는 {n}씨 월급에서 빼도 되죠?`]]},
+
+{w:'m',t:`솔직히 말해도 돼요? 저 요즘 {n}씨 때문에 속상해요. 제 마음 알죠? 이번 주만 좀 더 힘내줄 수 있어요?`,c:[
+ [`죄송합니다. 더 힘내겠습니다`,-3,-8,9,`고마워요~ 역시 우리 {n}씨. 그 마음 잊지 않을게요 (잊을 예정)`],
+ [`사장님 마음도 이해하지만 제 마음도 있어요`,0,8,-10,`어머, {n}씨 마음이요? 그건 오늘 처음 들어보네요^^`],
+ [`(눈물 글썽이는 이모티콘을 보낸다)`,0,2,6,`우는 건 에너지 낭비예요~ 그 에너지로 일해요^^`]]},
+
+{w:'m',t:`30분만 회의할게요~ (3시간 후) 거의 끝났어요~ 마지막으로 하나만 더요~`,c:[
+ [`(졸음을 참으며) 네...`,-8,-4,6,`{n}씨가 이렇게 집중해주니 회의가 길어지네요^^ 감사해요~`],
+ [`죄송하지만 다음 일정이 있어서...`,5,6,-10,`일정이요? 이 회의보다 중요한 일정이 있어요?^^`],
+ [`회의록 쓰는 척하며 쪽잠을 잔다`,6,2,-5,`{n}씨 필기가 왜 이렇게 길어요? 아, 졸고 있었구나~^^`]]},
+
+{w:'m',t:`휴가 가고 싶어요? 아유 당연히 가야죠~ 근데 지금 프로젝트가 한창이라... 휴가지에서도 연락은 받을 수 있죠? 노트북도 챙기고~`,c:[
+ [`네, 노트북 챙겨가겠습니다`,-6,-8,9,`고마워요~ 와이파이 되는 곳으로 가요!`],
+ [`그건 휴가가 아니라 원격 출장이잖아요`,0,8,-12,`어머, 휴가의 정의가 사람마다 다르군요~^^`],
+ [`휴가지에서 노트북 던지는 사진을 보낸다`,8,10,-16,`(읽음) ...(30분째 입력 중...) ...다음 주에 봐요^^`]]},
+
+{w:'m',t:`{n}씨 이번에 진짜 잘했어요! 그래서 보상으로... 다음 프로젝트도 {n}씨한테 맡길게요^^ 와, 좋겠다~`,c:[
+ [`영광입니다!`,-3,-6,10,`그럴 줄 알았어요~ 다음 프로젝트는 이번의 세 배 규모예요^^`],
+ [`그건 보상이 아니라 벌 같은데요`,0,6,-12,`벌이라니~ 성장의 기회예요. 성장은 힘든 법이죠^^`],
+ [`보상으로 반차 하나만 주세요`,8,4,-5,`반차는 다음 분기에 검토해볼게요~ (아마도 영원히)`]]},
+
+{w:'m',t:`{n}씨~ 우리 회사 인스타 알죠? 팔로우하고 좋아요 눌러줘요. 퇴근 후에 후기도 올려줘요. '#꿈의직장 #가족같은회사' 이렇게요^^`,c:[
+ [`해시태그까지 넣어서 올리겠습니다`,0,-8,10,`고마워요~ 사진엔 웃는 얼굴로 부탁해요!`],
+ [`사실대로 후기를 써도 될까요?`,0,8,-14,`사실이요? 어머, 그건 우리 회사 사정과 안 맞을 수도 있어요^^`],
+ [`비공개 계정에 후기를 올린다`,0,6,-2,`비공개면 아무도 못 보잖아요~ 의미 없어요.`]]},
+
+{w:'m',t:`점심은 팀 단합이 중요하잖아요~ 오늘은 제가 정한 메뉴로 갈게요. 못 먹는 건 없죠? 있어도 없는 걸로 해요^^`,c:[
+ [`저 다 잘 먹어요!`,-3,-6,7,`역시 {n}씨~ 복스럽게 먹는 모습이 보기 좋아요.`],
+ [`제가 알레르기가 있어서요`,5,5,-8,`아유 그건 마음의 문제일 수도 있어요. 한 입만요^^`],
+ [`다른 메뉴를 조심스럽게 제안해 본다`,0,2,-4,`좋은 의견이네요~ 다음 분기에 반영할게요.`]]},
+
+{w:'m',t:`{n}씨, 이번 달 월급이 조금 늦어질 것 같아요 ㅠㅠ 사정이 있어서요. 이해해 줄 거죠? 가족이니까^^`,c:[
+ [`이해합니다...`,-2,-12,10,`역시~ 이렇게 말 통하는 직원이 얼마나 귀한지 몰라요.`],
+ [`저는 가족이 아니라 직원인데요`,0,10,-16,`어머, 서운하다~ 그럼 이번 달은 '직원' 월급처럼 늦게 줄게요^^`],
+ [`달력에 월급날을 크게 동그라미 친다`,0,4,-6,`제가 보고 더 미안해지니까 그만해요^^ (안 줄 거란 얘긴 아님)`]]},
+
+{w:'m',t:`{n}씨 점심시간에 뭐 하고 있었어요? 휴대폰? 아~ 요즘 쉬는 시간도 업무 효율의 일부예요. 효율적으로 쉬었나요?`,c:[
+ [`효율적으로 쉬었습니다!`,0,-4,5,`그럼 다음엔 쉬는 시간 보고서를 한 장씩 부탁해요~`],
+ [`쉬는 시간은 효율을 따질 일이 아닌데요`,0,7,-10,`어머, 그렇게 생각하는 직원도 있구나~ 메모해 둘게요^^`],
+ [`'쉰 기록'을 보고서로 제출한다`,-2,3,8,`어머~ 이런 보고서 처음이에요. 매일 써줘요^^`]]},
+
+/* 합동 이벤트 */
+{w:'jm',t:[['j',`{n아}, 이번 프로젝트 마감 내일 아침이다.`],['m',`아유 사장님 너무 급하게 몰아붙이지 마세요~ {n}씨, 천천히 해요. 대신 내일 아침 8시까지만요^^`]],c:[
+ [`밤새서 끝내겠습니다`,-15,-5,12,[['j',`그래야지.`],['m',`역시 우리 {n}씨~ 간식비는 개인 카드로 해요^^`]]],
+ [`무리입니다. 일정 조정을 부탁드립니다`,5,6,-15,[['j',`무리? 무리를 하는 게 직장인이다.`],['m',`그러게요~ 무리 안 하는 직원이 어딨어요^^`]]],
+ [`두 분이 의견을 맞추신 뒤에 알려주세요`,0,8,-10,[['j',`(눈빛 교환)`],['m',`지금 맞췄어요! 내일 아침까지로^^`]]]]},
+
+{w:'jm',t:[['j',`올해 평가 나왔다. {n}은 B+다. 사실 C+인데 내가 인심 썼다.`],['m',`맞아요~ 사장님이 정말 후하게 주셨네요! {n}씨, 감사 인사 드려야죠?^^`]],c:[
+ [`감사합니다 사장님, 대표님`,-2,-10,12,[['j',`그래, 내년에도 이 점수 유지해라.`],['m',`와~ 인사성 너무 밝다. 이런 직원이 우리 회사의 복이에요^^`]]],
+ [`평가 기준이 무엇인지 알려주세요`,0,6,-14,[['j',`기준? 내 마음이다.`],['m',`사장님 마음이 곧 기준이에요~ 간단하죠?^^`]]],
+ [`그럼 B+면 연봉 인상이죠?`,0,4,-10,[['j',`연봉? 이 경제 상황에 연봉 얘기가 나와?`],['m',`어머, 용기 있다~ 용기 점수는 따로 없어요^^`]]]]},
+
+{w:'jm',t:[['m',`다음 주말에 체육대회 해요~ 참석 필수는 아니에요^^`],['j',`필수다. 불참 시 사유서와 시말서. 응원도구는 개인 구매.`]],c:[
+ [`참석하겠습니다!`,-8,-6,10,[['j',`응원 목소리 크게 해라.`],['m',`준비물은 간식 한 박스예요~ 총무는 {n}씨!^^`]]],
+ [`주말엔 쉬겠습니다`,6,8,-16,[['j',`시말서 양식은 내가 보내주지.`],['m',`아유~ 괜찮아요. 전혀 서운하지 않아요 (서운함)`]]],
+ [`참석은 하되 응원은 소리 없이 한다`,-2,2,-3,[['j',`조용히 서 있는 것도 응원이라고 본다.`],['m',`그것도 {n}씨만의 스타일이네요~ 눈에 띄긴 했어요^^`]]]]},
+
+/* 휴식 이벤트: 사장 부재 */
+{w:'s',t:`서지한 사장이 급한 골프 약속으로 오후 반차를 냈다. 사무실에 오랜만에 평화가 찾아왔다.`,c:[
+ [`책상에 엎드려 20분 낮잠을 잔다`,15,6,-3,`(20분 뒤) 몸이 한결 가볍다. 형광등 소리가 자장가 같았다.`],
+ [`일이나 하자... 불안해서 못 쉬겠다`,-3,-2,6,`사장이 없어도 눈치는 남아 있다. 몸에 밴 습관이 무섭다.`],
+ [`이직 사이트를 둘러본다`,2,12,-4,`'연봉 협상 가능'이라는 문구에 눈물이 났다.`]]},
+
+{w:'s',t:`류민결 사장이 해외 출장을 갔다. 지금은 인스타에 사진을 올리느라 메신저를 못 본다.`,c:[
+ [`탕비실에서 커피 한 잔과 함께 멍때린다`,10,10,-4,`커피가 이렇게 맛있었나. 고요함이 이런 맛이구나.`],
+ [`밀린 일을 처리해 둔다`,-4,-2,8,`생산성은 올랐지만 몸이 조금 무겁다.`],
+ [`동료와 사장 흉으로 수다를 떤다`,4,12,-6,`정신은 맑아졌는데 어째 뒷덜미가 서늘하다.`]]}
+);
+
+/* 특별 이벤트: 노동청 신고 엔딩으로 이어지는 선택지 */
+EVENTS.push({
+  id:'labor-report',w:'j',
+  t:`{n아}, 이번 달에도 야근 수당은 따로 없다고 생각해. 다들 회사 사정 어려운 거 알잖아? 기록은 남기지 말고.`,
+  c:[
+    [`근무 기록과 메신저 대화를 확보해 노동청에 신고한다`,-2,10,-18,`{n}은 차분히 근무 기록과 대화 내용을 정리해 신고했다. 며칠 뒤, 회사에 공식적인 확인 절차가 시작됐다. 서지한 사장: "이게 대체 무슨 일이야?!" 류민결 사장: "우리 가족끼리 대화로 풀면 안 될까요...?"`, 'labor'],
+    [`급여와 근무시간을 확인해 달라고 정식으로 요구한다`,-2,3,-8,`서지한 사장: "갑자기 원칙을 따지네?" 류민결 사장: "확인해 볼게요~" 대화 기록은 따로 보관해 두었다.`],
+    [`이번에도 그냥 넘어간다`,-4,-7,5,`서지한 사장: "그래, 괜한 문제 만들지 말고." 류민결 사장: "역시 우리 {n}씨~^^"`]
+  ]
+});
+(function(){
+var $=function(s){return document.querySelector(s)};
+var chat=$('#chat'), choicesEl=$('#choices'), hud=$('#hud');
+var NAME={j:'서지한 사장',m:'류민결 사장'};
+var DAYS=['월','화','수','목','금'];
+var SLOTS=['09:30','13:20','18:40','23:10'];
+var DAYLINE=['신입 환영 기간이라 사장들이 평소보다 조금 부드럽다. 조금.','어제의 피로가 풀리기도 전에 새 하루가 시작됐다.','수요일. 이번 주가 아직 반이나 남았다는 사실이 가장 큰 공포.','내일이 금요일이라는 희망 하나로 버틴다.','금요일. 오늘만 넘기면 주말이다. (주말 출근 공지가 없기를)'];
+var TOTAL=20, GID=0, S=null;
+var CODEX_KEY='papercompany_endings_v1';
+var END_META=[
+  {key:'hp',grade:'F',title:'책상 위에서 쓰러짐',desc:'체력이 바닥나 마지막까지 버티지 못했다.'},
+  {key:'mind',grade:'D',title:'홧김에 쓴 사직서',desc:'멘탈이 한계에 도달해 스스로 회사를 떠났다.'},
+  {key:'fired',grade:'F',title:'해고 통보 (3분 전 문자)',desc:'사장 눈치가 바닥나 해고 통보를 받았다.'},
+  {key:'promote',grade:'B-',title:'승진이라는 이름의 폭탄',desc:'승진했지만 책임만 세 배가 되었다.'},
+  {key:'vet',grade:'S',title:'금요일 퇴근 성공',desc:'체력과 멘탈을 지키며 금요일 퇴근에 성공했다.'},
+  {key:'fav',grade:'A',title:'사장님 눈에만 괜찮은 직원',desc:'사장들의 신임을 얻었지만 일은 더 많아졌다.'},
+  {key:'crawl',grade:'C',title:'겨우 살아서 도착, 월요일은 또 온다',desc:'5일을 버텼지만 주말에도 회사 연락이 기다린다.'},
+  {key:'labor',grade:'S+',title:'노동청 신고 성공',desc:'근무 기록과 대화 내용을 확보해 정당하게 신고했다.'}
+];
+function readCodex(){
+  try{
+    var saved=JSON.parse(localStorage.getItem(CODEX_KEY)||'[]');
+    return Array.isArray(saved)?saved.filter(function(k){return END_META.some(function(e){return e.key===k})}):[];
+  }catch(e){return []}
+}
+function saveEnding(kind){
+  var found=readCodex();
+  if(END_META.some(function(e){return e.key===kind})&&found.indexOf(kind)===-1){
+    found.push(kind);
+    try{localStorage.setItem(CODEX_KEY,JSON.stringify(found))}catch(e){}
+  }
+}
+function renderCodex(){
+  var found=readCodex(),list=$('#codex-list');
+  list.textContent='';
+  END_META.forEach(function(meta,i){
+    var unlocked=found.indexOf(meta.key)!==-1;
+    var item=el('div','codex-item'+(unlocked?'':' locked'));
+    var grade=el('div','codex-grade',unlocked?meta.grade:'?');
+    var info=el('div','');
+    info.append(el('div','codex-title',unlocked?meta.title:'???'));
+    info.append(el('div','codex-desc',unlocked?meta.desc:'아직 발견하지 못한 엔딩입니다.'));
+    item.append(grade,info);list.append(item);
+  });
+  var count=found.length+'/'+END_META.length;
+  $('#codex-progress').textContent=found.length+' / '+END_META.length+' 발견';
+  $('#codex-count-start').textContent=count;
+}
+function openCodex(){
+  renderCodex();
+  $('#codex').hidden=false;
+}
+function closeCodex(){
+  $('#codex').hidden=true;
+}
+var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function wait(ms){return new Promise(function(r){setTimeout(r,reduce?Math.min(ms,120):ms)})}
+function hasBatchim(ch){var c=ch.charCodeAt(0)-0xAC00;return c>=0&&c<11172&&c%28!==0}
+function fmt(s){
+  var n=S.nick,b=hasBatchim(n.charAt(n.length-1));
+  var m={'은':b?'은':'는','이':b?'이':'가','을':b?'을':'를','아':b?'아':'야','과':b?'과':'와'};
+  return s.replace(/\{n([은이을아과])?\}/g,function(_,p){return p?n+m[p]:n});
+}
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function addMsg(who,text){
+  var row=el('div','row '+who);
+  if(who==='s'){row.append(el('div','sys',text))}
+  else{
+    if(who!=='me')row.append(el('div','av',who==='j'?'서':'류'));
+    var col=el('div','col');
+    col.append(el('div','nm',who==='me'?S.nick:NAME[who]),el('div','bub',text));
+    row.append(col);
+  }
+  chat.append(row);chat.scrollTop=chat.scrollHeight;return row;
+}
+function typing(who){
+  var row=el('div','row '+who);row.append(el('div','av',who==='j'?'서':'류'));
+  var col=el('div','col');col.append(el('div','nm',NAME[who]));
+  var b=el('div','bub');var d=el('span','dots');d.append(el('span'),el('span'),el('span'));b.append(d);col.append(b);row.append(col);
+  chat.append(row);chat.scrollTop=chat.scrollHeight;return row;
+}
+async function say(who,text,gid){
+  if(who==='s'){addMsg('s',text);await wait(650);return}
+  var t=typing(who);await wait(520+Math.min(text.length*16,1000));t.remove();
+  if(gid!==GID)return;addMsg(who,text);await wait(380);
+}
+function clamp(v){return Math.max(0,Math.min(100,v))}
+function flash(k,d){
+  var e=$('#c-'+k);if(!d){return}
+  e.textContent=(d>0?'+':'')+d;e.className='chg '+(d>0?'up':'dn');
+  void e.offsetWidth;e.classList.add('show');
+}
+function render(){
+  ['h','m','f'].forEach(function(k){$('#v-'+k).textContent=S[k];$('#b-'+k).style.width=S[k]+'%'});
+}
+function apply(dh,dm,df){
+  var before={h:S.h,m:S.m,f:S.f};
+  S.h=clamp(S.h+dh);S.m=clamp(S.m+dm);S.f=clamp(S.f+df);
+  S.lost+=Math.max(0,before.h-S.h);
+  flash('h',S.h-before.h);flash('m',S.m-before.m);flash('f',S.f-before.f);
+  render();
+  if((S.h-before.h)+(S.m-before.m)<-8){hud.classList.remove('hit');void hud.offsetWidth;hud.classList.add('hit')}
+}
+function setClock(day,slot){$('#clock').textContent=DAYS[day]+'요일 '+SLOTS[slot]}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function pick(){
+  var a=shuffle(EVENTS).slice(0,TOTAL);
+  var report=EVENTS.find(function(ev){return ev.id==='labor-report'});
+  if(report&&a.indexOf(report)===-1)a[Math.floor(Math.random()*(TOTAL-1))]=report;
+  if(a[0].w==='s'){for(var i=1;i<a.length;i++){if(a[i].w!=='s'){var t=a[0];a[0]=a[i];a[i]=t;break}}}
+  /* 마지막 시간대(야근)에 휴식 이벤트가 걸리면 분위기가 깨지므로 한 칸 앞으로 */
+  return a;
+}
+function choose(ev){
+  return new Promise(function(resolve){
+    choicesEl.textContent='';
+    ev.c.forEach(function(c,i){
+      var b=el('button','opt',fmt(c[0]));b.type='button';
+      b.addEventListener('click',function(){choicesEl.textContent='';resolve(i)},{once:true});
+      choicesEl.append(b);
+    });
+    chat.scrollTop=chat.scrollHeight;
+  });
+}
+function lines(ev,resp){
+  if(Array.isArray(resp))return resp;
+  return [[ev.w==='jm'?'j':ev.w,resp]];
+}
+async function intro(gid){
+  var n=S.nick,len=Array.from(n).length;
+  await say('s','월요일 09:00 — 입사 첫날. 단톡방 「전 직원(퇴근불가)」에 초대되었습니다.',gid);if(gid!==GID)return;
+  var jl;
+  if(/서지한|류민결/.test(n))jl='{n}? 사장 이름을 닉네임으로 쓰다니 간이 크구나. 마음에 든다. 일도 그만큼 크게 해.';
+  else if(/사장|대표|회장/.test(n))jl='{n}? 직함이 이름에 들어 있네. 사장은 나 하나다. 직함 도용은 첫날부터 감점이다.';
+  else if(/퇴사|퇴근|사직|휴가|연차/.test(n))jl='{n}? 이름부터 불순하다. 입사 첫날부터 퇴근 얘기냐? 그 단어는 우리 회사 금지어야.';
+  else if(len<=1)jl='{n}? 한 글자라 부르기 편하네. 일도 한 번에 한 글자씩 끝내라.';
+  else if(len===2)jl='{n}? 두 글자라니, 이름이 짧은 만큼 퇴근도 짧길 바라지 마라.';
+  else if(len>=5)jl='{n}? 이름이 '+len+'글자나 되네. 부르다 퇴근 시간 지나겠다. 오늘부터 줄여서 \''+Array.from(n).slice(0,2).join('')+'\'라고 부른다.';
+  else jl='{n}{이라}? 평범한 이름이군. 일 잘하는 사람한테 이름은 중요하지 않아.';
+  jl=jl.replace('{n이라}','{n}라').replace('{n}라','{n}'+(hasBatchim(n.charAt(n.length-1))?'이라':'라'));
+  await say('j',fmt(jl),gid);if(gid!==GID)return;
+  await say('m',fmt('와~ {n}씨! 이름 너무 예쁘다~ 우리 회사에 딱이에요^^ 오늘부터 우리는 가족이에요. 일단 첫 업무부터 가볼까요?'),gid);
+}
+var ENDS={
+  hp:function(){return{g:'F',t:'책상 위에서 쓰러짐',d:fmt('{n이} 모니터 앞에서 조용히 쓰러졌다. 서지한 사장: "쟤 왜 안 일어나? 연기냐?" 류민결 사장: "어머, 가족 병원비는 개인 부담인 거 알죠~^^" 119는 동료가 불러줬다. 쓰러져 있던 시간은 무급 처리되었다.'),s:'다음에는 점심시간에 낮잠이라도 자 보세요.'}},
+  mind:function(){return{g:'D',t:'홧김에 쓴 사직서',d:fmt('{n은} 조용히 책상을 정리했다. 사직서에는 한 줄만 적혀 있었다. "제가 사장님들께 배운 단 한 가지, 이렇게 살면 안 된다." 서지한 사장은 "인수인계 한 달!"이라 소리쳤고, 류민결 사장은 "우린 가족이잖아요~"라며 문자 37통을 보냈다. {n은} 읽씹했다.'),s:'멘탈이 바닥나기 전에 맞서거나 도망쳤어야 했어요.'}},
+  fired:function(){return{g:'F',t:'해고 통보 (3분 전 문자)',d:fmt('서지한 사장: "{n아}, 오늘부로 자유다." 류민결 사장: "잘 가요~ 퇴직금은 우리 가족의 사랑으로 대체할게요^^" 짐을 상자에 담고 나오는 길, 이상하게 발걸음이 가벼웠다.'),s:'사장 눈치가 바닥나면 짐을 쌉니다. 가끔은 굽히는 것도 기술이에요.'}},
+  promote:function(){return{g:'B-',t:'승진이라는 이름의 폭탄',d:fmt('서지한 사장이 {n을} 불렀다. "오늘부터 팀장. 연봉은 그대로, 책임은 3배." 류민결 사장이 웃으며 덧붙였다. "직책수당은 감사와 영광이에요^^" 이제 {n} 팀장은 사장 둘의 화풀이 창구다.'),s:'사장 눈에 너무 들어도 좋은 일만 생기지는 않습니다.'}},
+  vet:function(){return{g:'S',t:'금요일 퇴근 성공',d:fmt('{n은} 5일을 버텨냈다. 서지한 사장: "수고했다. 다음 주에도 같은 속도로 와라." 류민결 사장: "주말에 카톡 보낼게요~ 답은 월요일에 줘도 돼요^^" 일단 오늘은 퇴근이다. 휴대폰은 비행기 모드로.'),s:'굽힐 땐 굽히고 버틸 땐 버틴 균형형 생존러. 월요일은 어쩔 수 없지만요.'}},
+  fav:function(){return{g:'A',t:'사장님 눈에만 괜찮은 직원',d:fmt('{n이} 두 사장의 마음에 쏙 들었다. 서지한 사장: "{n} 같은 직원이 열 명만 있으면." 류민결 사장: "다음 주부터 일이 두 배예요~ 믿어서 그래요^^" 칭찬은 가득 받았고, 체력은 반쯤 남았다.'),s:'순종형 생존자. 눈치 점수는 높지만 몸은 챙기세요.'}},
+  crawl:function(){return{g:'C',t:'겨우 살아서 도착, 월요일은 또 온다',d:fmt('{n은} 금요일 밤 현관문 앞에서 신발도 못 벗고 쓰러졌다. 휴대폰이 울린다. 발신: 류민결 사장. "{n}씨~ 주말에 잠깐만요^^" 받을지 말지는, 월요일의 {n}에게 맡긴다.'),s:'간신히 버텼지만 모든 게 간당간당했어요. 한 번 더 도전해 보세요.'}},
+  labor:function(){return{g:'S+',t:'노동청 신고 성공',d:fmt('{n은} 근무 기록과 회사 메신저 대화를 정리해 노동청에 신고했다. 회사에는 공식적인 확인 절차가 시작됐고, 두 사장은 처음으로 직원 앞에서 말문이 막혔다. 서지한 사장: "이런 건 대화로 해결해야지!" 류민결 사장: "우리 가족인데... 너무 단호하시네요^^" {n은} 자신의 권리를 지키고 회사를 나왔다.'),s:'참는 것만이 답은 아닙니다. 기록을 남기고 정당한 절차를 선택한 엔딩입니다.'}}
+};
+function finish(kind,gid){
+  if(gid!==GID)return;
+  var e=ENDS[kind](),days=Math.min(5,Math.floor(S.r/4)+1);
+  saveEnding(kind);
+  $('#e-who').textContent=S.nick+' 사원';
+  $('#e-grade').textContent=e.g;
+  $('#e-title').textContent=e.t;
+  $('#e-desc').textContent=e.d;
+  $('#e-sub').textContent=e.s;
+  var rows=[['버틴 기간',days+'일차'],['남은 체력',S.h],['남은 멘탈',S.m],['사장 눈치',S.f],['고개 숙인 횟수',S.obey+'회'],['맞서본 횟수',S.defy+'회'],['누적 소모 체력',S.lost]];
+  var dl=$('#e-stats');dl.textContent='';
+  rows.forEach(function(r){dl.append(el('dt',null,r[0]),el('dd',null,String(r[1])))});
+  $('#e-stamp').textContent=kind==='labor'?'권리 회복':((kind==='vet'||kind==='fav'||kind==='crawl')?'생존':'탈락');
+  renderCodex();
+  choicesEl.textContent='';
+  setTimeout(function(){$('#end').hidden=false},reduce?0:900);
+}
+async function play(nick){
+  var gid=++GID;
+  S={nick:nick,h:70,m:70,f:50,r:0,lost:0,obey:0,defy:0,order:pick()};
+  chat.textContent='';choicesEl.textContent='';
+  $('#whoami').textContent=nick+' 사원';
+  hud.hidden=false;render();setClock(0,0);
+  ['h','m','f'].forEach(function(k){$('#c-'+k).className='chg'});
+  await intro(gid);if(gid!==GID)return;
+  for(S.r=0;S.r<TOTAL;S.r++){
+    var ev=S.order[S.r],day=Math.floor(S.r/4),slot=S.r%4;
+    setClock(day,slot);
+    if(slot===0&&day>0){
+      await say('s',DAYS[day]+'요일 09:00 — 출근. '+DAYLINE[day],gid);if(gid!==GID)return;
+      apply(6,5,0);
+    }else if(slot>0){
+      await say('s',DAYS[day]+'요일 '+SLOTS[slot]+(slot===3?' — 퇴근 시간이 한참 지났다':''),gid);if(gid!==GID)return;
+    }
+    var parts=typeof ev.t==='string'?[[ev.w,ev.t]]:ev.t;
+    for(var p=0;p<parts.length;p++){await say(parts[p][0],fmt(parts[p][1]),gid);if(gid!==GID)return}
+    var i=await choose(ev);if(gid!==GID)return;
+    var c=ev.c[i];
+    addMsg('me',fmt(c[0]));await wait(450);
+    apply(c[1],c[2],c[3]);
+    if(c[3]>0)S.obey++;else if(c[3]<0)S.defy++;
+    var rl=lines(ev,c[4]);
+    for(var k=0;k<rl.length;k++){await say(rl[k][0],fmt(rl[k][1]),gid);if(gid!==GID)return}
+    if(c[5]==='labor')return finish('labor',gid);
+    if(S.h<=0)return finish('hp',gid);
+    if(S.m<=0)return finish('mind',gid);
+    if(S.f<=0)return finish('fired',gid);
+    if(S.f>=100)return finish('promote',gid);
+    await wait(300);
+  }
+  S.r=TOTAL-1;
+  await say('s','금요일 23:10 — 마침내 퇴근.',gid);if(gid!==GID)return;
+  var kind=(S.h>=40&&S.m>=40&&S.f>=35&&S.f<80)?'vet':(S.f>=75?'fav':'crawl');
+  finish(kind,gid);
+}
+$('#form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var n=$('#nick').value.trim().replace(/\s+/g,' ').slice(0,8)||'막내';
+  $('#start').hidden=true;$('#end').hidden=true;
+  play(n);
+});
+$('#again').addEventListener('click',function(){
+  GID++;$('#end').hidden=true;hud.hidden=true;chat.textContent='';choicesEl.textContent='';
+  $('#start').hidden=false;$('#nick').focus();
+});
+$('#open-codex-start').addEventListener('click',openCodex);
+$('#open-codex-end').addEventListener('click',openCodex);
+$('#close-codex').addEventListener('click',closeCodex);
+renderCodex();
+})();
+</script>
+
+</body></html>
